@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="KPITModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="KPITModelStoreContainer">
+    <EntitySet Name="Department" EntityType="KPITModel.Store.Department" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="EmployeeTable" EntityType="KPITModel.Store.EmployeeTable" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="FK_EmployeeTable_Department" Association="KPITModel.Store.FK_EmployeeTable_Department">
+      <End Role="Department" EntitySet="Department" />
+      <End Role="EmployeeTable" EntitySet="EmployeeTable" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="Department">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="DepartmentName" Type="nchar" MaxLength="10" />
+    <Property Name="CreatedBy" Type="nchar" MaxLength="10" />
+    <Property Name="CreatedDate" Type="nchar" MaxLength="10" />
+  </EntityType>
+  <EntityType Name="EmployeeTable">
+    <Key>
+      <PropertyRef Name="EmpID" />
+    </Key>
+    <Property Name="EmpID" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="EmpName" Type="nvarchar" MaxLength="255" />
+    <Property Name="EmpDesignation" Type="nvarchar" MaxLength="255" />
+    <Property Name="EmpAddress" Type="nvarchar" MaxLength="255" />
+    <Property Name="DepartmentID" Type="int" />
+    <Property Name="CreatedBy" Type="nvarchar" MaxLength="255" />
+  </EntityType>
+  <Association Name="FK_EmployeeTable_Department">
+    <End Role="Department" Type="KPITModel.Store.Department" Multiplicity="0..1" />
+    <End Role="EmployeeTable" Type="KPITModel.Store.EmployeeTable" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Department">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="EmployeeTable">
+        <PropertyRef Name="DepartmentID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

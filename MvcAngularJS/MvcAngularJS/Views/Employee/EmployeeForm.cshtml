@@ -1,0 +1,204 @@
+﻿@model MvcAngularJS.Models.EmployeeModels
+
+@{
+    ViewBag.Title = "EmployeeForm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .progress-bar {
+        width: 300px;
+        height: 14px;
+        border-radius: 10px;
+        border: 1px solid #CCC;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#6666cc), to(#4b4b95));
+        border-image: initial;
+    }
+
+    .uploaded {
+        padding: 0;
+        height: 14px;
+        border-radius: 10px;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#66cc00), to(#4b9500));
+        border-image: initial;
+    }
+
+    .dropbox {
+        width: 15em;
+        height: 3em;
+        border: 2px solid #DDD;
+        border-radius: 8px;
+        background-color: #FEFFEC;
+        text-align: center;
+        color: #BBB;
+        font-size: 2em;
+        font-family: Arial, sans-serif;
+    }
+
+        .dropbox span {
+            margin-top: 0.9em;
+            display: block;
+        }
+
+        .dropbox.not-available {
+            background-color: #F88;
+        }
+
+        .dropbox.over {
+            background-color: #bfb;
+        }
+</style>
+<h2>EmployeeForm</h2>
+<input name="dept" list="department" id="dept" />
+<datalist id="department">
+</datalist>
+<div data-ng-app="empApp" data-ng-controller="empCtrl">
+    <button data-ng-click="HideShowContent()" class="btn btn-primary">Add Employee</button>
+    <button data-ng-click="ClearAll()" data-ng-show="clr" class="btn btn-link">Clear</button>
+    <div data-ng-show="hideEmp" class="form-group">
+
+        <input type="text" data-ng-model="empID" data-ng-hide="true" />
+
+        <label for="usr">Enter Name:</label>
+        <input data-ng-model="empName" type="text" class="form-control" style="width: 250px" />
+
+        <label for="usr">Enter Designation:</label>
+        <input data-ng-model="empDesignation" type="text" class="form-control" style="width: 250px" />
+
+        <label for="usr">Enter Department:</label>
+
+
+        <select data-ng-model="dept" style="width: 250px" class="form-control">
+            <option value="" selected>-- Choose Department --</option>
+            <option data-ng-repeat="dept in distinctDepartment" value="{{dept.ID}}">{{dept.DepartmentName}}</option>
+        </select>
+
+        <label for="usr">Enter Address:</label>
+        <input data-ng-model="empAddress" type="text" class="form-control" style="width: 250px" />
+
+        <label for="usr">Enter Created By:</label>
+        <input data-ng-model="empCreatedBy" type="text" class="form-control" style="width: 250px" />
+
+        <button data-ng-click="addEmp()" data-ng-show="hideSave" class="btn btn-primary">
+            Add
+        </button>
+        <button data-ng-click="txtbxBtn()" data-ng-show="hideUpdate" class="btn btn-primary">Update</button>
+
+    </div>
+    <br>
+
+
+    <div class="form-horizontal">
+
+        <label for="usr">Free text Search:</label>
+        <input type="search" data-ng-model="search" placeholder="Search..." class="form-control" style="width: 250px">
+        <br>
+        <label for="usr">Select from Dropdown:</label>
+        <select data-ng-model="emp" style="width: 250px" data-ng-change="SelectEmp(emp)" class="form-control">
+            <option value="" selected>-- Choose employee --</option>
+            <option value="SelectAll" selected>Show All</option>
+            <option data-ng-repeat="employee in distinctemployees" value="{{employee.EmpID}}">{{employee.EmpName}}</option>
+        </select>
+        <br>
+        <input type="text" data-ng-model="searchText" data-ng-change="hideAutocomplete();" />
+        <div data-ng-hide="showAutoComplete" data-ng-repeat="item in employees | filter: searchText">
+            <ui>{{ item.EmpName }}</ui>
+        </div>
+    </div>
+    Result Lenght : {{resultLenght}}
+
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <td data-ng-click="predicate = 'Name'; reverse=!reverse">Name</td>
+                    <td data-ng-click="predicate = 'Designation'; reverse=!reverse">Designation</td>
+                    <td data-ng-click="predicate = 'Address'; reverse=!reverse">Address</td>
+                    <td>Department</td>
+                    <td>Action</td>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr data-ng-repeat="employee in employees | startFrom:currentPage*pageSize | limitTo:pageSize | filter: search | orderBy:predicate:reverse" data-ng-class="{danger:!entry.active}" data-ng-mouseenter="showEdit = true" data-ng-mouseleave="showEdit = false">
+                    <td data-ng-hide="true" data-ng-bind="employee.EmpID"></td>
+                    <td>
+                        <span data-ng-hide="edit" data-ng-bind="employee.EmpName" data-ng-click="edit = true"></span>
+                        <input type="text" class="form-control" data-ng-show="edit" data-ng-model="employee.EmpName" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false" />
+                    </td>
+
+                    @*we can write like this {{employee.EmpName}} also instead of ng-bind*@
+                    <td>
+                        <span data-ng-hide="edit" data-ng-bind="employee.EmpDesignation" data-ng-click="edit = true"></span>
+                        <input type="text" class="form-control" data-ng-show="edit" data-ng-model="employee.EmpDesignation" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false" />
+                    </td>
+                    <td>
+                        <span data-ng-hide="edit" data-ng-bind="employee.EmpAddress" data-ng-click="edit = true"></span>
+                        <input type="text" class="form-control" data-ng-show="edit" data-ng-model="employee.EmpAddress" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false" />
+                    </td>
+                    <td>
+                        <span data-ng-hide="edit" data-ng-bind="employee.DepartmentName" data-ng-click="edit = true"></span>
+                        <input type="text" class="form-control" data-ng-show="edit" data-ng-model="employee.DepartmentName" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false" />
+                    </td>
+                    <td>
+                        <span data-ng-hide="edit" data-ng-bind="employee.CreatedBy" data-ng-click="edit = true"></span>
+                        <input type="text" class="form-control" data-ng-show="edit" data-ng-model="employee.CreatedBy" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false" />
+                    </td>
+                    <td>
+                        <button data-ng-show="showEdit" data-ng-click="edit = true;editEmp(employee)" class="btn btn-primary" data-on-esc="edit = false;" data-on-enter="edit = false">Edit</button>
+                        <button data-ng-show="edit" data-ng-click="edit = false; rptBtn(employee)" class="btn btn-primary" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false">Update</button>
+                        <button data-ng-show="edit" data-ng-click="edit = false;" class="btn btn-primary" data-on-esc="edit = false;" data-on-enter="edit = false" data-ng-mouseenter="showEdit = false">Cancel</button>
+                        <button data-ng-show="showEdit" data-ng-click="deleteEmp(employee)" class="btn btn-primary" data-on-esc="edit = false;" data-on-enter="edit = false">Delete</button>
+                    </td>
+                </tr>
+
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5">
+                        <button data-ng-disabled="currentPage == 0" data-ng-click="currentPage=currentPage-1" class="btn btn-default">
+                            Previous
+                        </button>
+                        {{currentPage+1}}/{{numberOfPages()}}
+                        <button data-ng-disabled="currentPage >= employees.length/pageSize - 1" data-ng-click="currentPage=currentPage+1" class="btn btn-default">
+                            Next
+                        </button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="alert alert-success" data-ng-hide="hideSuccess">
+        <strong>Success!</strong> {{successMessage}}.
+    </div>
+    <div class="alert alert-warning" data-ng-hide="hideWarning">
+        <strong>Warning!</strong> {{warningMessage}}.
+    </div>
+
+
+    <div class="row">
+        <label for="fileToUpload">Select a File to Upload</label><br />
+        <input type="file" ng-model-instant id="fileToUpload" multiple onchange="angular.element(this).scope().setFiles(this)" />
+    </div>
+    OR
+    <div id="dropbox" class="dropbox" ng-class="dropClass"><span>{{dropText}}</span></div>
+    <div ng-show="files.length">
+        <div ng-repeat="file in files.slice(0)">
+            <span>{{file.webkitRelativePath || file.name}}</span>
+            (<span ng-switch="file.size > 1024*1024">
+                <span ng-switch-when="true">{{file.size / 1024 / 1024 | number:2}} MB</span>
+                <span ng-switch-default>{{file.size / 1024 | number:2}} kB</span>
+            </span>)
+        </div>
+        <input type="button" ng-click="uploadFile()" value="Upload" />
+        <div ng-show="progressVisible">
+            <div class="percent">{{progress}}%</div>
+            <div class="progress-bar">
+                <div class="uploaded" ng-style="{'width': progress+'%'}"></div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
